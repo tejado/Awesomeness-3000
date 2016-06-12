@@ -153,7 +153,7 @@ for rule_id in rules_keys:
                 print("open")
             elif result == errno.ECONNREFUSED and connref_is_open == True:
                 j += 1
-                print("\bopen (NO SERVICE)")
+                print("open (NO SERVICE)")
             elif result == errno.EAGAIN or result == errno.EWOULDBLOCK or result == errno.ECONNREFUSED:
                 print("closed") 
             elif result == errno.EHOSTUNREACH:
