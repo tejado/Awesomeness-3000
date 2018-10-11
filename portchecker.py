@@ -22,7 +22,10 @@ timeout = 5
 # otherwise it will be interpreted as a closed one
 connref_is_open = True
 
-#
+#create rules array
+rules_dict = {}
+
+##
 # Format:
 #   rule_id ; description ; target_address;  port_1 ; port_2 ; port_3 ; port_n 
 #
@@ -31,6 +34,8 @@ connref_is_open = True
 # The port is default interpreted as tcp but can be changed to udp with a "/udp" suffix, e.g. 123/udp
 # UDP mode is experimental - not verified if its working correctly.
 
+#You can also use a .csv file and use that as an argument like this: python portchecker.py filename.csv
+#However, it still needs to have ; as the delimiter.
 rules_csv = """
 10; Internet - google.net; www.google.net; 80; 443
 """
@@ -50,6 +55,7 @@ rules_csv = """
 # """
 
 
+
 # as we don't want to have non-standard packages in this portchecker, ipv6 address will be validated per regex
 # http://stackoverflow.com/a/319293
 def is_valid_ipv6(ip):
@@ -63,22 +69,31 @@ def natural_sort(l):
     convert = lambda text: int(text) if text.isdigit() else text.lower() 
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
     return sorted(l, key = alphanum_key)
+
+def create_rules_dict(reader) :
+    for row in reader:
+        if not row:
+            continue
+        rule_id = row[0].strip()
+        if rule_id not in rules_dict:
+            rules_dict[rule_id] = {'desc': row[1].strip()}
+        rules_dict[rule_id][row[2].strip()] = row[3:]
     
 
 print("")
 print( "Awesomenes Portchecker 3000" )
 print( "---------------------------" )
-
-rules_dict = {}
-f = StringIO(rules_csv)
-reader = csv.reader(f, delimiter=';')
-for row in reader:
-    if not row:
-        continue
-    rule_id = row[0].strip()
-    if rule_id not in rules_dict:
-        rules_dict[rule_id] = {'desc': row[1].strip()}
-    rules_dict[rule_id][row[2].strip()] = row[3:]
+if len(sys.argv) > 1:
+    with open(sys.argv[1]) as f:
+        reader = csv.reader(f, delimiter=';')
+        create_rules_dict(reader)
+else:
+    try:
+        f = StringIO(rules_csv)
+        reader = csv.reader(f, delimiter=';')
+        create_rules_dict(reader);
+    except NameError:
+        print("Please define the rules_csv variable")
 
 rules_keys = natural_sort(rules_dict.keys())
 for rule_id in rules_keys:
