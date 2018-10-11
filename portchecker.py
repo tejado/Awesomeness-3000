@@ -84,6 +84,12 @@ print("")
 print( "Awesomenes Portchecker 3000" )
 print( "---------------------------" )
 if len(sys.argv) > 1:
+    try:
+        if os.stat(sys.argv[1]).st_size < 1:
+            raise Exception('Please put contents in the file.')
+    except Exception as error:
+        print(repr(error))
+        
     with open(sys.argv[1]) as f:
         reader = csv.reader(f, delimiter=';')
         create_rules_dict(reader)
